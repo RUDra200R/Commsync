@@ -1,0 +1,7 @@
+In Git bash:
+
+1)To Install any shadcn library : npx shadcn@latest add {}
+
+2)To run project: npm run dev
+
+3) to Run convex: npx convex dev
