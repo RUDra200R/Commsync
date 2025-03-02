@@ -149,9 +149,6 @@ export const get = query({
             }
         }
 
-
-
-
         return workspaces;
     },
 });
