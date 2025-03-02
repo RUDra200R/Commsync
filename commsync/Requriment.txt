@@ -1,6 +1,7 @@
 In Git bash:
 
 1)To Install any shadcn library : npx shadcn@latest add {}
+2)To Install any react library : npm install <library-name> --save
 
 2)To run project: npm run dev
 
