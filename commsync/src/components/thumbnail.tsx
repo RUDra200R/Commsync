@@ -1,6 +1,9 @@
-/* eslint-disable @next/next/no-img-element*/
+/* eslint-disable @next/next/no-img-element */
 
-import { Dialog,
+import { VisuallyHidden } from '@reach/visually-hidden';
+
+import { 
+    Dialog,
     DialogContent,
     DialogHeader,
     DialogTitle,
@@ -17,15 +20,18 @@ export const Thumbnail = ({url}: ThumbnailProps) => {
 
     return (
         <Dialog>
-            <DialogTrigger asChild>
-            <div className="relative overflow-hidden max-w-[360px] border rounded-lg my-2 cursor-zoom-in">
+        <DialogTrigger>
+            <div className="relative overflow-hidden max-w-[180px] border rounded-lg my-2 cursor-zoom-in">
                 <img src={url} alt="Message image"  className="rounded-md object-cover size-full"/>
             </div>
-            </DialogTrigger>
-            <DialogContent className="max-w-[800px]">
-
-            </DialogContent>
-        </Dialog>
+        </DialogTrigger>
+        <DialogContent className="max-w-[600px] border-none bg-transparent p-0 shadow-none">
+            <VisuallyHidden>
+                <DialogTitle>Image Preview</DialogTitle>
+            </VisuallyHidden>
+            <img src={url} alt="Message image"  className="rounded-md object-cover size-full"/>
+        </DialogContent>
+    </Dialog>
        
     );
 };

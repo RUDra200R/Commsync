@@ -1,6 +1,13 @@
 import { GetMessagesReturnType } from "@/features/messages/api/use-get-messages";
 import { differenceInMinutes, format, isToday, isYesterday} from "date-fns";
 import { Message } from "./message";
+import { ChannelHero } from "./channel-hero";
+import { useState } from "react";
+import { Id } from "../../convex/_generated/dataModel";
+import { useWorkspaceId } from "@/hooks/use-workspace-id";
+import { useCurrentMember } from "@/features/members/api/use-current-members";
+import { Loader } from "lucide-react";
+import { ConversationHero } from "./conversation-hero";
 
 
 // here is 5 minute for comapct if user sent a message in 5 min then compact=true
@@ -36,12 +43,18 @@ export const MessageList = ({
     memberImage,
     channelName,
     channelCreationTime,
-    data,
     variant,
+    data,
     loadMore,
     isLoadingMore,
     canLoadMore,
 }: MessageListProps) => {
+
+    const [editingId, setEditingId] = useState<Id<"messages"> | null>(null);
+
+    const workspaceId = useWorkspaceId();
+    const {data: currentMember } = useCurrentMember({workspaceId})
+
 
     const groupMessages = data?.reduce(
         (groups, message) => {
@@ -57,6 +70,9 @@ export const MessageList = ({
         },
         {} as Record<string, typeof data>
     );
+    // console.log("Variant:", variant);
+    // console.log("Channel Creation Time:", channelCreationTime);
+    // console.log("Channel Name:", channelName);
 
     return (
         <div className="flex-1 flex flex-col-reverse pb-4 overflow-y-auto messages-scrollbar">
@@ -85,26 +101,67 @@ export const MessageList = ({
                             memberId={message.memberId}
                             authorImage={message.user.image}
                             authorName={message.user.name}
-                            isAuthor={false}
+                            isAuthor={message.memberId === currentMember?._id}
                             reactions={message.reactions}
                             body={message.body}
                             image={message.image}
                             updateAt={message.updateAt}
                             createdAt={message._creationTime}
-                            isEditing={false}
-                            setEditingId={()=> {}}
+                            isEditing={editingId === message._id}
+                            setEditingId={setEditingId}
                             isCompact={isCompact}
-                            hideThreadButton={false}
+                            hideThreadButton={variant === "thread"}
                             threadCount={message.threadCount}
                             threadImage={message.threadImage}
                             threadTimestamp={message.threadTimestamp}
-
                             />
                         )
                     })}
                 </div>
-            ))}
+            ))} 
+
+            <div 
+            className="h-1"
+            ref={(el) => {
+                if (el) {
+                    const observer = new IntersectionObserver(
+                        ([entry]) => {
+                            if (entry.isIntersecting && canLoadMore) {
+                                loadMore();
+                            }
+                        },
+                        {threshold: 1.0}
+                    );
+                    observer.observe(el);
+                    return () => observer.disconnect();
+                }
+            }}
+            />
+                {isLoadingMore && (
+                    <div className="text-center my-2 relative">
+                    <hr  className="absolute top-1/2 left-0 right-0 border-gray-300"/>
+                    <span className="relative inline-block bg-white px-4 py-1 rounded-full text-xs border border-gray-300 shadow-sm">
+                        <Loader className="size-4 animate-spin"></Loader>
+                    </span>
+                </div>
+                )}
+           
+            {/* This is not printing  because variant is undefined?*/}
+           {variant === "channel" && channelName && channelCreationTime && (
+            <ChannelHero
+            name={channelName}
+            creationTime={channelCreationTime}
+            />
+           )}
+
+            {variant === "conversation" && (
+            <ConversationHero
+            name={memberName}
+            image={memberImage}
+            />
+           )}
         </div>
+        
     );
 
 }
